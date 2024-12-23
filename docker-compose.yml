@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  syncify:
+    build: .
+    image: syncify
+    ports:
+      - "5001:5001"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"

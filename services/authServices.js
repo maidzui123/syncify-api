@@ -9,7 +9,7 @@ import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import firebase from "firebase-admin";
-import serviceAccount from "../conf/key/firebase.json" with { type: "json" };
+import serviceAccount from "../conf/key/firebase.js";
 import { uploadFile } from "./uploadService.js";
 
 firebase.initializeApp({

@@ -41,11 +41,11 @@ const specs = swaggerJsDoc(options);
 
 // Database and Redis URL
 const dbUrl = process.env.DB_URL;
-const redisUrl = process.env.REDIS_URL || "";
+// const redisUrl = process.env.REDIS_URL || "";
 
 // Redis connection
-const pubClient = new Redis(redisUrl);
-const subClient = pubClient.duplicate();
+// const pubClient = new Redis(redisUrl);
+// const subClient = pubClient.duplicate();
 
 // Database connection
 mongoose
@@ -57,12 +57,12 @@ mongoose
 
 // Create HTTP server and integrate with Socket.IO + Redis
 const server = http.createServer(app);
-const io = new Server(server, {
-  adapter: createAdapter(pubClient, subClient),
-});
+// const io = new Server(server, {
+//   adapter: createAdapter(pubClient, subClient),
+// });
 
-// Initialize socket handler
-socketHandler(io, pubClient, subClient);
+// // Initialize socket handler
+// socketHandler(io, pubClient, subClient);
 
 // Middleware
 app.use(cors());

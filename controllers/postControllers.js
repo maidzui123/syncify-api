@@ -77,7 +77,7 @@ postControllers.archivePost = async (req, res) => {
 postControllers.deletePost = async (req, res) => {
   try {
     const userId = req.user;
-    const { postId } = req.body;
+    const postId = req.params.postId;
 
     return await postServices.handleDeletePost(userId, postId, res);
   } catch (error) {

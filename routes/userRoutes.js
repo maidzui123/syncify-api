@@ -6,47 +6,47 @@ import validate from "../middleware/validate.js";
 const router = express.Router();
 
 // My Profile
-router.get("/api/me", authentication, userControllers.getMyProfile);
+router.get("/api/user/profile/me", authentication, userControllers.getMyProfile);
 
 // My Profile
-router.get("/api/user-profile/:userId", authentication, userControllers.getUserProfile);
+router.get("/api/user/profile/:userId", authentication, userControllers.getUserProfile);
 
 // Get List Friends
-router.get("/api/list-friends", authentication, userControllers.getListFriends);
+router.get("/api/user/friends/list", authentication, userControllers.getListFriends);
 
 // Get List Friends Request
 router.get(
-  "/api/list-fr-request",
+  "/api/user/fr-request/list",
   authentication,
   userControllers.getListFriendsRequest
 );
 
 // Send friend request
 router.post(
-  "/api/fr-request",
+  "/api/user/friends/request",
   authentication,
   userControllers.sendFriendRequest
 );
 
 // Accept friend request
 router.post(
-  "/api/accept-fr-request",
+  "/api/user/fr-request/accept",
   authentication,
   userControllers.acceptFriendRequest
 );
 
 // Reject friend request
 router.post(
-  "/api/reject-fr-request",
+  "/api/user/fr-request/reject",
   authentication,
   userControllers.rejectFriendRequest
 );
 
 // Unfriend
-router.post("/api/unfriend", authentication, userControllers.unfriend);
+router.post("/api/user/unfriend", authentication, userControllers.unfriend);
 
 // Search User
-router.post("/api/search-user", authentication, userControllers.searchUser);
+router.post("/api/user/search", authentication, userControllers.searchUser);
 
 /**
  * @swagger
@@ -54,7 +54,7 @@ router.post("/api/search-user", authentication, userControllers.searchUser);
  *   - name: User
  *     description: API liên quan đến người dùng
  *
- * /api/me:
+ * /api/user/profile/me:
  *   get:
  *     summary: Lấy thông tin bản thân
  *     tags:
@@ -77,7 +77,7 @@ router.post("/api/search-user", authentication, userControllers.searchUser);
  *                   name:
  *                     type: string
  *                     example: "John Doe"
- * /api/user-profile/{userId}:
+ * /api/user/profile/{userId}:
  *   get:
  *     summary: "Lấy thông tin user khác"
  *     tags:
@@ -95,7 +95,7 @@ router.post("/api/search-user", authentication, userControllers.searchUser);
  *     responses:
  *       200:
  *         description: "Thành công."
- * /api/list-friends:
+ * /api/user/friends/list:
  *   get:
  *     summary: Lấy danh sách bạn bè
  *     tags:
@@ -131,7 +131,7 @@ router.post("/api/search-user", authentication, userControllers.searchUser);
  *                   name:
  *                     type: string
  *
- * /api/list-fr-request:
+ * /api/user/fr-request/list:
  *   get:
  *     summary: Lấy danh sách yêu cầu kết bạn
  *     tags:
@@ -184,7 +184,7 @@ router.post("/api/search-user", authentication, userControllers.searchUser);
  *                     type: string
  *                     format: date-time
  *
- * /api/fr-request:
+ * /api/user/friends/request:
  *   post:
  *     summary: Gửi yêu cầu kết bạn
  *     tags:
@@ -207,7 +207,7 @@ router.post("/api/search-user", authentication, userControllers.searchUser);
  *       200:
  *         description: Thành công
  *
- * /api/accept-fr-request:
+ * /api/user/fr-request/accept:
  *   post:
  *     summary: Chấp nhận yêu cầu kết bạn
  *     tags:
@@ -228,7 +228,7 @@ router.post("/api/search-user", authentication, userControllers.searchUser);
  *       200:
  *         description: Thành công
  *
- * /api/reject-fr-request:
+ * /api/user/fr-request/reject:
  *   post:
  *     summary: Từ chối yêu cầu kết bạn
  *     tags:
@@ -249,7 +249,7 @@ router.post("/api/search-user", authentication, userControllers.searchUser);
  *       200:
  *         description: Thành công
  *
- * /api/unfriend:
+ * /api/user/unfriend:
  *   post:
  *     summary: Hủy kết bạn
  *     tags:
@@ -270,7 +270,7 @@ router.post("/api/search-user", authentication, userControllers.searchUser);
  *       200:
  *         description: Thành công
  *
- * /api/search-user:
+ * /api/user/search:
  *   post:
  *     summary: Tìm kiếm người dùng
  *     tags:

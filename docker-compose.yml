@@ -4,7 +4,7 @@ services:
     build: .
     image: syncify
     ports:
-      - "5001:5001"
+      - "3000:3000"
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

@@ -6,44 +6,44 @@ import validate from "../middleware/validate.js";
 const router = express.Router();
 
 // Create New Post
-router.post("/api/new-post", authentication, validate(createPostSchema), postControllers.createPost);
+router.post("/api/post", authentication, validate(createPostSchema), postControllers.createPost);
 
 // Comment Post
-router.post("/api/comment-post", authentication, postControllers.commentPost);
+router.post("/api/post/comment", authentication, postControllers.commentPost);
 
 // Like/Unlike Post
-router.post("/api/interact-post", authentication, postControllers.interactPost);
+router.post("/api/post/interact", authentication, postControllers.interactPost);
 
 // Reply comment
-router.post("/api/reply-comment", authentication, postControllers.replyComment);
+router.post("/api/post/reply", authentication, postControllers.replyComment);
 
 // Archive Post
-router.post("/api/archive-post", authentication, postControllers.archivePost);
+router.post("/api/post/archive", authentication, postControllers.archivePost);
 
 // Delete Post
-router.delete("/api/delete-post", authentication, postControllers.deletePost);
+router.delete("/api/post/del/:postId", authentication, postControllers.deletePost);
 
 // Update Post
-router.patch("/api/update-post/:postId", authentication, postControllers.updatePost);
+router.patch("/api/post/:postId", authentication, postControllers.updatePost);
 
 // Update Comment
-router.patch("/api/update-comment/:commentId", authentication, postControllers.updateComment);
+router.patch("/api/post/comment/:commentId", authentication, postControllers.updateComment);
 
 // Update Reply
-router.patch("/api/update-reply/:commentId/:replyId", authentication, postControllers.updateReply);
+router.patch("/api/post/reply/:commentId/:replyId", authentication, postControllers.updateReply);
 
 //  User's List Posts
-router.get("/api/my-posts", authentication, postControllers.getUserListPosts);
+router.get("/api/post/me", authentication, postControllers.getUserListPosts);
 
 // User's List Archived Posts
-router.get("/api/archived-posts", authentication, postControllers.getUserListArchivedPosts);
+router.get("/api/post/archive/list", authentication, postControllers.getUserListArchivedPosts);
 
 /**
  * @swagger
  * tags:
  *   - name: Post
  *     description: API liên quan đến bài đăng và tương tác với bài đăng
- * /api/new-post:
+ * /api/post:
  *   post:
  *     summary: "Tạo bài đăng mới"
  *     description: "API cho phép người dùng tạo một bài đăng mới với nội dung, phương tiện và quyền riêng tư."
@@ -76,7 +76,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Thông tin bài đăng không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/comment-post:
+ * /api/post/comment:
  *   post:
  *     summary: "Bình luận vào bài đăng"
  *     description: "API cho phép người dùng bình luận vào một bài đăng."
@@ -104,7 +104,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Thông tin bình luận không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/interact-post:
+ * /api/post/interact:
  *   post:
  *     summary: "Thích/Không thích bài đăng"
  *     description: "API cho phép người dùng tương tác với bài đăng (thích hoặc không thích)."
@@ -132,7 +132,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Thông tin không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/reply-comment:
+ * /api/post/reply:
  *   post:
  *     summary: "Trả lời bình luận"
  *     description: "API cho phép người dùng trả lời một bình luận của bài đăng."
@@ -160,7 +160,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Thông tin trả lời không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/archive-post:
+ * /api/post/archive:
  *   post:
  *     summary: "Lưu trữ bài đăng"
  *     description: "API cho phép người dùng lưu trữ một bài đăng."
@@ -185,7 +185,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Thông tin bài đăng không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/delete-post:
+ * /api/post/del/{postId}:
  *   delete:
  *     summary: "Xóa bài đăng"
  *     description: "API cho phép người dùng xóa một bài đăng."
@@ -193,16 +193,13 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *      - Post
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               postId:
- *                 type: string
- *                 description: "ID của bài đăng"
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         description: "ID của bài đăng cần xóa"
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: "Bài đăng đã được xóa"
@@ -210,7 +207,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Thông tin bài đăng không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/update-post/{id}:
+ * /api/post/{postId}:
  *   patch:
  *     summary: "Cập nhật bài đăng"
  *     description: "API cho phép người dùng cập nhật một bài đăng cụ thể."
@@ -220,7 +217,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: postId
  *         required: true
  *         description: "ID của bài đăng cần cập nhật"
  *         schema:
@@ -248,7 +245,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Thông tin cập nhật không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/update-comment/{id}:
+ * /api/post/comment/{commentId}:
  *   patch:
  *     summary: "Cập nhật bình luận"
  *     description: "API cho phép người dùng cập nhật một bình luận cụ thể."
@@ -258,7 +255,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: commentId
  *         required: true
  *         description: "ID của bình luận cần cập nhật"
  *         schema:
@@ -280,7 +277,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Thông tin cập nhật không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/update-reply/{commentId}/{replyId}:
+ * /api/post/reply/{commentId}/{replyId}:
  *   patch:
  *     summary: "Cập nhật trả lời bình luận"
  *     description: "API cho phép người dùng cập nhật một trả lời bình luận cụ thể."
@@ -318,7 +315,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Thông tin cập nhật không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/my-posts:
+ * /api/post/me:
  *   get:
  *     summary: "Lấy danh sách bài đăng của người dùng"
  *     description: "API cho phép người dùng lấy danh sách các bài đăng của mình."
@@ -345,7 +342,7 @@ router.get("/api/archived-posts", authentication, postControllers.getUserListArc
  *         description: "Danh sách bài đăng của người dùng"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/archived-posts:
+ * /api/post/archive/list:
  *   get:
  *     summary: "Lấy danh sách bài đăng đã lưu trữ của người dùng"
  *     description: "API cho phép người dùng lấy danh sách bài đăng đã lưu trữ của mình."

@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import * as userServices from "../services/userServices.js";
-const socketHandler = (io, pubClient, subClient) => {
+import { handleNotifyFriendRequest } from "../services/notificationServices.js";
+import { pubClient, subClient } from "./redisClient.js";
+const socketHandler = (io) => {
   io.use((socket, next) => {
     const headers = socket.handshake.headers;
     const token = headers["authorization"].split(" ")[1];
@@ -16,7 +18,7 @@ const socketHandler = (io, pubClient, subClient) => {
 
       socket.userId = decoded._id;
       socket.join(socket.userId.toString());
-      
+
       return next();
     });
   });
@@ -37,10 +39,6 @@ const socketHandler = (io, pubClient, subClient) => {
             connectedAt: new Date(),
           })
         );
-        // socket.to(data._id.toString()).emit("userOnline", {
-        //   userId: socket.userId,
-        //   connectedAt: new Date(),
-        // });
       });
     });
 
@@ -59,16 +57,12 @@ const socketHandler = (io, pubClient, subClient) => {
             disconnectedAt: new Date(),
           })
         );
-        // socket.to(data._id.toString()).emit("userOffline", {
-        //   userId: socket.userId,
-        //   disconnectedAt: new Date(),
-        // });
       });
     });
   });
 
   // Redis Subscriber for Pub/Sub
-  subClient.subscribe("userOnline", "userOffline");
+  subClient.subscribe("userOnline", "userOffline", "friendRequest");
 
   subClient.on("message", (channel, message) => {
     const eventData = JSON.parse(message);
@@ -83,8 +77,20 @@ const socketHandler = (io, pubClient, subClient) => {
         userId: eventData.userId,
         disconnectedAt: eventData.disconnectedAt,
       });
+    } else if (channel === "friendRequest") {
+      io.to(eventData.userId).emit("friendRequest", eventData);
     }
   });
 };
 
-export default socketHandler;
+const sendFriendRequestNoti = async (userId, otherUserId, type) => {
+  if (type === "friendRequest") {
+    const payload = await handleNotifyFriendRequest(userId, otherUserId);
+    if (!payload) {
+      return;
+    }
+
+    pubClient.publish("friendRequest", JSON.stringify(payload));
+  }
+};
+export { socketHandler, sendFriendRequestNoti };

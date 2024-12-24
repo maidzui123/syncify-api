@@ -1,7 +1,7 @@
 import { User } from "../models/UserSchemas.js";
 import FriendRequest from "../models/FriendRequestSchemas.js";
 import sendResponse from "../helper/sendResponse.helper.js";
-
+import { sendFriendRequestNoti } from "../sockets/socketHandler.js";
 const handleUpdateStatus = async (userId, status) => {
   try {
     const checkUser = await User.findById(userId);
@@ -221,6 +221,7 @@ const handleSendFriendRequest = async (userId, friendId, res) => {
     });
 
     await newFriendRequest.save();
+    await sendFriendRequestNoti(userId, friendId, "friendRequest");
 
     return sendResponse({ res, status: 200, message: "Friend request sent" });
   } catch (error) {

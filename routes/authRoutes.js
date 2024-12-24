@@ -11,23 +11,23 @@ const router = express.Router();
 // Register
 router.post("/api/register", validate(registerSchema), authControllers.register);
 // Verify Code (Register)
-router.post("/api/verify-code", validate(verifyCodeSchema), authControllers.verifyCode);
+router.post("/api/code/verify", validate(verifyCodeSchema), authControllers.verifyCode);
 // Resend Code (Register)
-router.post("/api/resend-code", authControllers.resendCode);
+router.post("/api/code/resend", authControllers.resendCode);
 // Login
 router.post("/api/login", authControllers.login);
 // Refresh Token
 router.post("/api/refresh-token", authControllers.refreshToken);
 // Send Code (For Reset Password)
-router.post("/api/send-code", authControllers.sendCode);
+router.post("/api/code/send", authControllers.sendCode);
 // Reset password
 router.post("/api/reset-password", authentication, authControllers.resetPassword);
 // Login with Google
-router.post("/api/google-login", authControllers.googleLogin);
+router.post("/api/google/login", authControllers.googleLogin);
 // Update profile
-router.patch("/api/update-profile", authentication, authControllers.updateProfile);
+router.patch("/api/user", authentication, authControllers.updateProfile);
 // Upload image
-router.post("/api/upload-file", authentication, upload.single("file"), authControllers.uploadFile);
+router.post("/api/upload", authentication, upload.single("file"), authControllers.uploadFile);
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ router.post("/api/upload-file", authentication, upload.single("file"), authContr
  *         description: "Thông tin không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/verify-code:
+ * /api/code/verify:
  *   post:
  *     summary: "Xác minh mã đăng ký"
  *     description: "API cho phép xác minh mã gửi đến email trong quá trình đăng ký."
@@ -89,7 +89,7 @@ router.post("/api/upload-file", authentication, upload.single("file"), authContr
  *         description: "Mã xác minh không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/resend-code:
+ * /api/code/resend:
  *   post:
  *     summary: "Gửi lại mã xác minh"
  *     description: "API cho phép gửi lại mã xác minh đăng ký vào email."
@@ -161,7 +161,7 @@ router.post("/api/upload-file", authentication, upload.single("file"), authContr
  *         description: "Token không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/send-code:
+ * /api/code/send:
  *   post:
  *     summary: "Gửi mã để reset mật khẩu"
  *     description: "API cho phép gửi mã để reset mật khẩu của người dùng."
@@ -209,7 +209,7 @@ router.post("/api/upload-file", authentication, upload.single("file"), authContr
  *         description: "Mật khẩu không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/google-login:
+ * /api/google/login:
  *   post:
  *     summary: "Đăng nhập bằng Google"
  *     description: "API cho phép người dùng đăng nhập bằng Google thông qua accessToken."
@@ -232,14 +232,14 @@ router.post("/api/upload-file", authentication, upload.single("file"), authContr
  *         description: "Access token không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/update-profile:
+ * /api/user:
  *   patch:
  *     summary: "Cập nhật hồ sơ người dùng"
  *     description: "API cho phép người dùng cập nhật thông tin hồ sơ của mình."
  *     security:
  *       - bearerAuth: []  # Yêu cầu Bearer token
  *     tags:
- *      - Auth
+ *      - User
  *     requestBody:
  *       required: true
  *       content:
@@ -273,7 +273,7 @@ router.post("/api/upload-file", authentication, upload.single("file"), authContr
  *         description: "Dữ liệu không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/upload-file:
+ * /api/upload:
  *   post:
  *     summary: "Tải lên hình ảnh"
  *     description: "API cho phép người dùng tải lên tệp hình ảnh hoặc video."

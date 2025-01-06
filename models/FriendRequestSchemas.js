@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const friendRequestSchema = new mongoose.Schema({
   fromUserId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
+    ref: "users",
     required: true,
   },
   toUserId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
+    ref: "users",
     required: true,
   },
   status: {
@@ -42,6 +42,6 @@ friendRequestSchema.set("toJSON", {
   },
 });
 
-const FriendRequest = mongoose.model("FriendRequest", friendRequestSchema);
+const FriendRequest = mongoose.model("friend_requests", friendRequestSchema);
 
 export default FriendRequest;

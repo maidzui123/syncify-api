@@ -6,44 +6,47 @@ import validate from "../middleware/validate.js";
 const router = express.Router();
 
 // Create New Post
-router.post("/api/post", authentication, validate(createPostSchema), postControllers.createPost);
+router.post("/api/posts", authentication, validate(createPostSchema), postControllers.createPost);
 
 // Comment Post
-router.post("/api/post/comment", authentication, postControllers.commentPost);
+router.post("/api/posts/comment", authentication, postControllers.commentPost);
 
 // Like/Unlike Post
-router.post("/api/post/interact", authentication, postControllers.interactPost);
+router.post("/api/posts/interact", authentication, postControllers.interactPost);
+
+// Share Post
+router.post("/api/posts/share", authentication, postControllers.sharePost);
 
 // Reply comment
-router.post("/api/post/reply", authentication, postControllers.replyComment);
+router.post("/api/posts/reply", authentication, postControllers.replyComment);
 
 // Archive Post
-router.post("/api/post/archive", authentication, postControllers.archivePost);
+router.post("/api/posts/archive", authentication, postControllers.archivePost);
 
 // Delete Post
-router.delete("/api/post/del/:postId", authentication, postControllers.deletePost);
+router.delete("/api/posts/del/:postId", authentication, postControllers.deletePost);
 
 // Update Post
-router.patch("/api/post/:postId", authentication, postControllers.updatePost);
+router.patch("/api/posts/:postId", authentication, postControllers.updatePost);
 
 // Update Comment
-router.patch("/api/post/comment/:commentId", authentication, postControllers.updateComment);
+router.patch("/api/posts/comment/:commentId", authentication, postControllers.updateComment);
 
 // Update Reply
-router.patch("/api/post/reply/:commentId/:replyId", authentication, postControllers.updateReply);
+router.patch("/api/posts/reply/:commentId/:replyId", authentication, postControllers.updateReply);
 
 //  User's List Posts
-router.get("/api/post/me", authentication, postControllers.getUserListPosts);
+router.get("/api/posts/me", authentication, postControllers.getUserListPosts);
 
 // User's List Archived Posts
-router.get("/api/post/archive/list", authentication, postControllers.getUserListArchivedPosts);
+router.get("/api/posts/archives", authentication, postControllers.getUserListArchivedPosts);
 
 /**
  * @swagger
  * tags:
  *   - name: Post
  *     description: API liên quan đến bài đăng và tương tác với bài đăng
- * /api/post:
+ * /api/posts:
  *   post:
  *     summary: "Tạo bài đăng mới"
  *     description: "API cho phép người dùng tạo một bài đăng mới với nội dung, phương tiện và quyền riêng tư."
@@ -76,7 +79,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Thông tin bài đăng không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/comment:
+ * /api/posts/comment:
  *   post:
  *     summary: "Bình luận vào bài đăng"
  *     description: "API cho phép người dùng bình luận vào một bài đăng."
@@ -104,7 +107,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Thông tin bình luận không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/interact:
+ * /api/posts/interact:
  *   post:
  *     summary: "Thích/Không thích bài đăng"
  *     description: "API cho phép người dùng tương tác với bài đăng (thích hoặc không thích)."
@@ -132,7 +135,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Thông tin không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/reply:
+ * /api/posts/reply:
  *   post:
  *     summary: "Trả lời bình luận"
  *     description: "API cho phép người dùng trả lời một bình luận của bài đăng."
@@ -160,7 +163,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Thông tin trả lời không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/archive:
+ * /api/posts/archives:
  *   post:
  *     summary: "Lưu trữ bài đăng"
  *     description: "API cho phép người dùng lưu trữ một bài đăng."
@@ -185,7 +188,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Thông tin bài đăng không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/del/{postId}:
+ * /api/posts/del/{postId}:
  *   delete:
  *     summary: "Xóa bài đăng"
  *     description: "API cho phép người dùng xóa một bài đăng."
@@ -207,7 +210,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Thông tin bài đăng không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/{postId}:
+ * /api/posts/{postId}:
  *   patch:
  *     summary: "Cập nhật bài đăng"
  *     description: "API cho phép người dùng cập nhật một bài đăng cụ thể."
@@ -245,7 +248,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Thông tin cập nhật không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/comment/{commentId}:
+ * /api/posts/comment/{commentId}:
  *   patch:
  *     summary: "Cập nhật bình luận"
  *     description: "API cho phép người dùng cập nhật một bình luận cụ thể."
@@ -277,7 +280,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Thông tin cập nhật không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/reply/{commentId}/{replyId}:
+ * /api/posts/reply/{commentId}/{replyId}:
  *   patch:
  *     summary: "Cập nhật trả lời bình luận"
  *     description: "API cho phép người dùng cập nhật một trả lời bình luận cụ thể."
@@ -315,7 +318,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Thông tin cập nhật không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/me:
+ * /api/posts/me:
  *   get:
  *     summary: "Lấy danh sách bài đăng của người dùng"
  *     description: "API cho phép người dùng lấy danh sách các bài đăng của mình."
@@ -342,7 +345,7 @@ router.get("/api/post/archive/list", authentication, postControllers.getUserList
  *         description: "Danh sách bài đăng của người dùng"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/post/archive/list:
+ * /api/posts/archive:
  *   get:
  *     summary: "Lấy danh sách bài đăng đã lưu trữ của người dùng"
  *     description: "API cho phép người dùng lấy danh sách bài đăng đã lưu trữ của mình."

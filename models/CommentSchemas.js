@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const commentSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
+    ref: "users",
     required: true,
   },
   content: {
@@ -14,7 +14,7 @@ const commentSchema = new mongoose.Schema({
     {
       createdBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
+        ref: "users",
         required: true,
       },
       content: {
@@ -25,11 +25,21 @@ const commentSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
       },
+      updatedAt: {
+        type: Date,
+        default: Date.now,
+      },
     },
   ],
   createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-const Comment = mongoose.model("Comment", commentSchema);
+commentSchema.pre("save", function (next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+const Comment = mongoose.model("comments", commentSchema);
 
 export { Comment, commentSchema };

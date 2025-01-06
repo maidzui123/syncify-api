@@ -55,10 +55,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  tel: {
+    type: String,
+    required: false,
+  },
   friends: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
+      ref: "users",
       default: [],
     },
   ],
@@ -89,7 +93,7 @@ userSchema.pre("save", function (next) {
   next();
 });
 
-const User = mongoose.model("Users", userSchema);
+const User = mongoose.model("users", userSchema);
 
 const registerSchema = Joi.object({
   username: Joi.string().required().messages({

@@ -1,5 +1,7 @@
 import sendResponse from "../helper/sendResponse.helper.js";
 import * as userServices from "../services/userServices.js";
+import { ERROR } from "../constants/error.js";
+
 const userControllers = {};
 
 // Get My Profile
@@ -8,7 +10,12 @@ userControllers.getMyProfile = async (req, res) => {
     const userId = req.user;
     return await userServices.handleGetMyProfile(userId, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -19,9 +26,14 @@ userControllers.getUserProfile = async (req, res) => {
     const otherUserId = req.params.userId;
     return await userServices.handleGetUserProfile(userId, otherUserId, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
-}
+};
 
 // Get List Friends
 userControllers.getListFriends = async (req, res) => {
@@ -31,7 +43,12 @@ userControllers.getListFriends = async (req, res) => {
     const limit = req.query.limit;
     return await userServices.handleGetListFriends(userId, cursor, limit, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -52,7 +69,12 @@ userControllers.getListFriendsRequest = async (req, res) => {
       res
     );
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -64,7 +86,12 @@ userControllers.sendFriendRequest = async (req, res) => {
 
     return await userServices.handleSendFriendRequest(userId, friendId, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -80,7 +107,12 @@ userControllers.acceptFriendRequest = async (req, res) => {
       res
     );
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -96,7 +128,12 @@ userControllers.rejectFriendRequest = async (req, res) => {
       res
     );
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -108,7 +145,12 @@ userControllers.unfriend = async (req, res) => {
 
     return await userServices.handleUnfriend(userId, friendId, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -120,7 +162,12 @@ userControllers.searchUser = async (req, res) => {
 
     return await userServices.handleSearchUser(userId, username, tag, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 export default userControllers;

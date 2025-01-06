@@ -1,7 +1,9 @@
 import { User } from "../models/UserSchemas.js";
 import FriendRequest from "../models/FriendRequestSchemas.js";
 import sendResponse from "../helper/sendResponse.helper.js";
-import { sendFriendRequestNoti } from "../sockets/socketHandler.js";
+import { sendNotification } from "../sockets/socketHandler.js";
+import { ERROR } from "../constants/error.js";
+
 const handleUpdateStatus = async (userId, status) => {
   try {
     const checkUser = await User.findById(userId);
@@ -40,11 +42,21 @@ const handleGetMyProfile = async (userId, res) => {
       "-friends -password -__v -createdAt -updatedAt -isGoogle -isAdmin"
     );
     if (!checkUser) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
     return sendResponse({ res, status: 200, data: checkUser });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -53,7 +65,12 @@ const handleGetUserProfile = async (userId, otherUserId, res) => {
     const checkUser = await User.findById(userId);
 
     if (!checkUser) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     const checkOtherUser = await User.findById(otherUserId).select(
@@ -61,12 +78,22 @@ const handleGetUserProfile = async (userId, otherUserId, res) => {
     );
 
     if (!checkUser) {
-      return sendResponse({ res, status: 404, message: "User not found" });
+      return sendResponse({
+        res,
+        status: 404,
+        message: "User not found",
+        errorCode: ERROR.USER_NOT_FOUND,
+      });
     }
 
     return sendResponse({ res, status: 200, data: checkOtherUser });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -75,7 +102,12 @@ const handleGetListFriends = async (userId, cursor, limit, res) => {
     const checkUser = await User.findById(userId);
 
     if (!checkUser) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     const query = { _id: { $in: checkUser.friends } };
@@ -101,7 +133,12 @@ const handleGetListFriends = async (userId, cursor, limit, res) => {
       },
     });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -120,7 +157,12 @@ const handleGetListFriendsRequest = async (
     const checkUser = await User.findById(userId);
 
     if (!checkUser) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     if (scope === "other") {
@@ -158,6 +200,7 @@ const handleGetListFriendsRequest = async (
         res,
         status: 400,
         message: "Invalid scope",
+        errorCode: ERROR.SCOPE_INVALID,
       });
     }
 
@@ -175,22 +218,41 @@ const handleGetListFriendsRequest = async (
       },
     });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
 const handleSendFriendRequest = async (userId, friendId, res) => {
   try {
+    if (userId === friendId) {
+      return sendResponse({
+        res,
+        status: 400,
+        message: "You can't send friend request to yourself",
+        errorCode: ERROR.SEND_REQ_TO_SELF,
+      });
+    }
+    
     const user = await User.findById(userId);
 
     if (!user) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     const friend = await User.findById(friendId);
 
     if (!friend) {
-      return sendResponse({ res, status: 404, message: "User not found" });
+      return sendResponse({ res, status: 404, message: "Friend not found" });
     }
 
     if (user.friends.includes(friendId)) {
@@ -198,6 +260,7 @@ const handleSendFriendRequest = async (userId, friendId, res) => {
         res,
         status: 400,
         message: "You are already friends with this user",
+        errorCode: ERROR.FRIEND_ALREADY,
       });
     }
 
@@ -212,6 +275,7 @@ const handleSendFriendRequest = async (userId, friendId, res) => {
         res,
         status: 400,
         message: "You have already sent a friend request to this user",
+        errorCode: ERROR.FRIEND_REQ_ALREADY,
       });
     }
 
@@ -221,11 +285,16 @@ const handleSendFriendRequest = async (userId, friendId, res) => {
     });
 
     await newFriendRequest.save();
-    await sendFriendRequestNoti(userId, friendId, "friendRequest");
+    await sendNotification(userId, friendId, "friendRequest");
 
     return sendResponse({ res, status: 200, message: "Friend request sent" });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -233,7 +302,12 @@ const handleAcceptFriendRequest = async (userId, frRequestId, res) => {
   try {
     const toUser = await User.findById(userId);
     if (!toUser) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     const friendRequest = await FriendRequest.findById(frRequestId);
@@ -243,11 +317,17 @@ const handleAcceptFriendRequest = async (userId, frRequestId, res) => {
         res,
         status: 404,
         message: "Friend request not found",
+        errorCode: ERROR.FRIEND_REQ_NOT_FOUND,
       });
     }
 
     if (friendRequest.toUserId.toString() !== userId) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     if (friendRequest.status !== "pending") {
@@ -255,6 +335,7 @@ const handleAcceptFriendRequest = async (userId, frRequestId, res) => {
         res,
         status: 400,
         message: "Friend request is not pending",
+        errorCode: ERROR.FRIEND_REQ_NOT_PENDING,
       });
     }
 
@@ -263,13 +344,19 @@ const handleAcceptFriendRequest = async (userId, frRequestId, res) => {
         res,
         status: 400,
         message: "You are already friends with this user",
+        errorCode: ERROR.FRIEND_ALREADY,
       });
     }
 
     const fromUser = await User.findById(friendRequest.fromUserId);
 
     if (!fromUser) {
-      return sendResponse({ res, status: 404, message: "User not found" });
+      return sendResponse({
+        res,
+        status: 404,
+        message: "User not found",
+        errorCode: ERROR.USER_NOT_FOUND,
+      });
     }
 
     toUser.friends.push(friendRequest.fromUserId);
@@ -281,13 +368,24 @@ const handleAcceptFriendRequest = async (userId, frRequestId, res) => {
     friendRequest.status = "accepted";
     await friendRequest.save();
 
+    await sendNotification(
+      userId,
+      friendRequest.fromUserId,
+      "acceptFriendRequest"
+    );
+
     return sendResponse({
       res,
       status: 200,
       message: "Friend request accepted",
     });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -295,7 +393,12 @@ const handleRejectFriendRequest = async (userId, frRequestId, res) => {
   try {
     const toUser = await User.findById(userId);
     if (!toUser) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     const friendRequest = await FriendRequest.findById(frRequestId);
@@ -305,11 +408,17 @@ const handleRejectFriendRequest = async (userId, frRequestId, res) => {
         res,
         status: 404,
         message: "Friend request not found",
+        errorCode: ERROR.FRIEND_REQ_NOT_FOUND,
       });
     }
 
     if (friendRequest.toUserId.toString() !== userId) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     if (friendRequest.status !== "pending") {
@@ -317,6 +426,7 @@ const handleRejectFriendRequest = async (userId, frRequestId, res) => {
         res,
         status: 400,
         message: "Friend request is not pending",
+        errorCode: ERROR.FRIEND_REQ_NOT_PENDING,
       });
     }
 
@@ -329,7 +439,12 @@ const handleRejectFriendRequest = async (userId, frRequestId, res) => {
       message: "Friend request rejected",
     });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -339,11 +454,21 @@ const handleUnfriend = async (userId, friendId, res) => {
     const friend = await User.findById(friendId);
 
     if (!user) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     if (!friend) {
-      return sendResponse({ res, status: 404, message: "User not found" });
+      return sendResponse({
+        res,
+        status: 404,
+        message: "User not found",
+        errorCode: ERROR.USER_NOT_FOUND,
+      });
     }
 
     if (!user.friends.includes(friendId)) {
@@ -351,6 +476,7 @@ const handleUnfriend = async (userId, friendId, res) => {
         res,
         status: 400,
         message: "You are not friends with this user",
+        errorCode: ERROR.FRIEND_NOT_EXIST,
       });
     }
 
@@ -368,7 +494,12 @@ const handleUnfriend = async (userId, friendId, res) => {
 
     return sendResponse({ res, status: 200, message: "Unfriend successful" });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -376,7 +507,12 @@ const handleSearchUser = async (userId, username, tag, res) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      return sendResponse({ res, status: 401, message: "Access Denied" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
+      });
     }
 
     const searchUser = await User.findOne({ username, tag }).select(
@@ -384,12 +520,22 @@ const handleSearchUser = async (userId, username, tag, res) => {
     );
 
     if (!searchUser) {
-      return sendResponse({ res, status: 404, message: "User not found" });
+      return sendResponse({
+        res,
+        status: 404,
+        message: "User not found",
+        errorCode: ERROR.USER_NOT_FOUND,
+      });
     }
 
     return sendResponse({ res, status: 200, data: searchUser });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 

@@ -11,7 +11,7 @@ import bcrypt from "bcryptjs";
 import firebase from "firebase-admin";
 import serviceAccount from "../conf/key/firebase.js";
 import { uploadFile } from "./uploadService.js";
-
+import { ERROR } from "../constants/error.js";
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),
 });
@@ -171,6 +171,7 @@ const handleRegister = async (req, res) => {
         res,
         status: 400,
         message: "User already exists",
+        errorCode: ERROR.USER_EXIST,
       });
     }
 
@@ -187,27 +188,36 @@ const handleRegister = async (req, res) => {
 
     return sendResponse({ res, status: 200, message: "Register success" });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
 const handleVerifyCode = async (code, email, res) => {
   try {
+    const checkCodeExpired = await Code.findOne({ code });
+
+    if (!checkCodeExpired) {
+      return sendResponse({
+        res,
+        status: 400,
+        message: "Code is expired",
+        errorCode: ERROR.CODE_EXPIRED,
+      });
+    }
+
     const checkCode = await Code.findOne({ email, code });
 
     if (!checkCode) {
       return sendResponse({
         res,
         status: 400,
-        message: "Code is wrong or expired",
-      });
-    }
-
-    if (checkCode.expiredAt < new Date()) {
-      return sendResponse({
-        res,
-        status: 400,
-        message: "Code is expired",
+        message: "Code is wrong",
+        errorCode: ERROR.CODE_WRONG,
       });
     }
 
@@ -231,9 +241,19 @@ const handleVerifyCode = async (code, email, res) => {
     return await createTokenPair(res, newUser);
   } catch (error) {
     if (error.name === "ValidationError") {
-      return sendResponse({ res, status: 400, message: error.message });
+      return sendResponse({
+        res,
+        status: 400,
+        message: error.message,
+        errorCode: ERROR.VALIDATION_ERROR,
+      });
     }
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -244,7 +264,12 @@ const handleResendCode = async (email, res) => {
     sendEmail(res, email, code, "resend");
     return sendResponse({ res, status: 200, message: "Resend code success" });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -253,18 +278,42 @@ const handleLogin = async (email, password, res) => {
     const user = await User.findOne({ email: email });
 
     if (!user) {
-      return sendResponse({ res, status: 401, message: "Unauthorized" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Unauthorized",
+        errorCode: ERROR.UNAUTHORIZED,
+      });
+    }
+
+    if (!user.password) {
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Unauthorized",
+        errorCode: ERROR.UNAUTHORIZED,
+      });
     }
 
     const isPasswordValid = await verifyPassword(password, user.password);
 
     if (!isPasswordValid) {
-      return sendResponse({ res, status: 401, message: "Unauthorized" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Unauthorized",
+        errorCode: ERROR.UNAUTHORIZED,
+      });
     }
 
     return await createTokenPair(res, user);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -274,6 +323,7 @@ const handleRefreshToken = async (refreshToken, res) => {
       res,
       status: 400,
       message: "Refresh token is required",
+      errorCode: ERROR.RT_REQUIRED,
     });
   }
 
@@ -281,9 +331,12 @@ const handleRefreshToken = async (refreshToken, res) => {
     const tokenRecord = await Token.findOne({ refreshToken });
 
     if (!tokenRecord) {
-      return res
-        .status(401)
-        .json({ status: false, error: "Invalid refresh token" });
+      return sendResponse({
+        res,
+        status: 401,
+        message: "Invalid refresh token",
+        errorCode: ERROR.RT_INVALID,
+      });
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
@@ -294,9 +347,11 @@ const handleRefreshToken = async (refreshToken, res) => {
     const remainingTime = exp - currentTime;
 
     if (remainingTime <= 0) {
-      return res
-        .status(401)
-        .json({ status: false, error: "Refresh token expired" });
+      return res.status(401).json({
+        status: false,
+        error: "Refresh token expired",
+        errorCode: ERROR.RT_EXPIRED,
+      });
     }
 
     const newAccessToken = await generateToken(
@@ -322,22 +377,34 @@ const handleRefreshToken = async (refreshToken, res) => {
     });
   } catch (error) {
     console.error("Error refreshing token:", error);
-    return res
-      .status(401)
-      .json({ status: false, error: "Invalid or expired refresh token" });
+    return res.status(401).json({
+      status: false,
+      error: "Invalid or expired refresh token",
+      errorCode: ERROR.RT_INVALID_EXPIRED,
+    });
   }
 };
 
 const handleSendCode = async (email, res) => {
   try {
     if (!email) {
-      return sendResponse({ res, status: 400, message: "Email is required" });
+      return sendResponse({
+        res,
+        status: 400,
+        message: "Email is required",
+        errorCode: ERROR.EMAIL_REQUIRED,
+      });
     }
 
     const checkEmail = await User.findOne({ email: email });
 
     if (!checkEmail) {
-      return sendResponse({ res, status: 400, message: "Email not found" });
+      return sendResponse({
+        res,
+        status: 400,
+        message: "Email not found",
+        errorCode: ERROR.EMAIL_NOT_FOUND,
+      });
     }
 
     const code = await createCode();
@@ -347,7 +414,12 @@ const handleSendCode = async (email, res) => {
 
     return sendResponse({ res, status: 200, message: "Send code success" });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -360,6 +432,7 @@ const handleResetPassword = async (userId, password, res) => {
         res,
         status: 401,
         message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
       });
     }
 
@@ -371,7 +444,12 @@ const handleResetPassword = async (userId, password, res) => {
       message: "Reset password success",
     });
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -398,9 +476,19 @@ const handleGoogleLogin = async (accessToken, res) => {
     return await createTokenPair(res, newUser);
   } catch (error) {
     if (error.name === "ValidationError") {
-      return sendResponse({ res, status: 400, message: error.message });
+      return sendResponse({
+        res,
+        status: 400,
+        message: error.message,
+        errorCode: ERROR.VALIDATION_ERROR,
+      });
     }
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -409,7 +497,12 @@ const handleUpdateProfile = async (userId, updatedData, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return sendResponse({ res, status: 404, message: "User not found" });
+      return sendResponse({
+        res,
+        status: 404,
+        message: "User not found",
+        errorCode: ERROR.USER_NOT_FOUND,
+      });
     }
 
     const existingUsernameAndTag = await User.findOne({
@@ -423,6 +516,7 @@ const handleUpdateProfile = async (userId, updatedData, res) => {
         res,
         status: 400,
         message: "Display name or tag already exists",
+        errorCode: ERROR.NAME_TAG_EXIST,
       });
     }
 
@@ -435,9 +529,19 @@ const handleUpdateProfile = async (userId, updatedData, res) => {
     return sendResponse({ res, status: 200, message: "Update success" });
   } catch (error) {
     if (error.name === "ValidationError") {
-      return sendResponse({ res, status: 400, message: error.message });
+      return sendResponse({
+        res,
+        status: 400,
+        message: error.message,
+        errorCode: ERROR.VALIDATION_ERROR,
+      });
     }
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -449,6 +553,7 @@ const handleUploadFile = async (userId, imagePath, type, folderName, res) => {
         res,
         status: 401,
         message: "Access Denied",
+        errorCode: ERROR.ACCESS_DENIED,
       });
     }
     if (imagePath) {
@@ -460,10 +565,16 @@ const handleUploadFile = async (userId, imagePath, type, folderName, res) => {
         res,
         status: 400,
         message: "Image path not valid",
+        errorCode: ERROR.IMAGE_PATH_INVALID,
       });
     }
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({
+      res,
+      status: 500,
+      message: error.message,
+      errorCode: ERROR.SERVER_ERROR,
+    });
   }
 };
 export {

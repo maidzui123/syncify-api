@@ -14,4 +14,16 @@ notificationControllers.getUserListNotifications = async (req, res) => {
   }
 };
 
+// Mark Notification as Read
+notificationControllers.markNotificationAsRead = async (req, res) => {
+  try {
+    const userId = req.user;
+    const notificationId = req.body.notificationId;
+    return await notificationServices.handleMarkNotificationAsRead(userId, notificationId, res);
+  } catch (error) {
+    return sendResponse({ res, status: 500, message: error.message });
+  }
+};
+
 export default notificationControllers;
+

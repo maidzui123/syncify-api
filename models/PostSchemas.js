@@ -5,7 +5,7 @@ import Joi from "joi";
 const postSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
+    ref: "users",
     required: true,
   },
   content: {
@@ -18,9 +18,9 @@ const postSchema = new mongoose.Schema({
       type: { type: String, enum: ["image", "video", "audio"], required: true },
     },
   ],
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
   comments: [commentSchema],
-  shares: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  shares: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
   privacy: {
     type: String,
     enum: ["public", "private", "friends"],
@@ -47,6 +47,6 @@ const createPostSchema = Joi.object({
   privacy: Joi.string(),
 });
 
-const Post = mongoose.model("Post", postSchema);
+const Post = mongoose.model("posts", postSchema);
 
 export { Post, createPostSchema };

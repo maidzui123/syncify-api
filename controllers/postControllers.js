@@ -1,5 +1,6 @@
 import sendResponse from "../helper/sendResponse.helper.js";
 import * as postServices from "../services/postServices.js";
+import { ERROR } from "../constants/error.js";
 const postControllers = {};
 
 // Create New Post
@@ -16,7 +17,7 @@ postControllers.createPost = async (req, res) => {
       res
     );
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 
@@ -28,7 +29,7 @@ postControllers.commentPost = async (req, res) => {
 
     return await postServices.handleCommentPost(userId, postId, content, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 
@@ -40,9 +41,21 @@ postControllers.interactPost = async (req, res) => {
 
     return await postServices.handleInteractPost(userId, postId, isLike, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
+
+// Share Post
+postControllers.sharePost = async (req, res) => {
+  try {
+    const userId = req.user;
+    const { postId } = req.body;
+
+    return await postServices.handleSharePost(userId, postId, res);
+  } catch (error) {
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
+  }
+}
 
 // Reply comment
 postControllers.replyComment = async (req, res) => {
@@ -57,7 +70,7 @@ postControllers.replyComment = async (req, res) => {
       res
     );
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 
@@ -69,7 +82,7 @@ postControllers.archivePost = async (req, res) => {
 
     return await postServices.handleArchivePost(userId, postId, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 
@@ -81,7 +94,7 @@ postControllers.deletePost = async (req, res) => {
 
     return await postServices.handleDeletePost(userId, postId, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 
@@ -117,7 +130,7 @@ postControllers.updatePost = async (req, res) => {
 
     return await postServices.handleUpdatePost(userId, postId, req.body, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 
@@ -158,7 +171,7 @@ postControllers.updateComment = async (req, res) => {
       res
     );
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 
@@ -201,7 +214,7 @@ postControllers.updateReply = async (req, res) => {
       res
     );
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 
@@ -213,7 +226,7 @@ postControllers.getUserListPosts = async (req, res) => {
     const limit = req.query.limit;
     return await postServices.handleGetUserListPosts(userId, cursor, limit, res);
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 
@@ -230,7 +243,7 @@ postControllers.getUserListArchivedPosts = async (req, res) => {
       res
     );
   } catch (error) {
-    return sendResponse({ res, status: 500, message: error.message });
+    return sendResponse({ res, status: 500, message: error.message, errorCode: ERROR.SERVER_ERROR });
   }
 };
 export default postControllers;

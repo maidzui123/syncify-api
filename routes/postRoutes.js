@@ -6,13 +6,22 @@ import validate from "../middleware/validate.js";
 const router = express.Router();
 
 // Create New Post
-router.post("/api/posts", authentication, validate(createPostSchema), postControllers.createPost);
+router.post(
+  "/api/posts",
+  authentication,
+  validate(createPostSchema),
+  postControllers.createPost
+);
 
 // Comment Post
 router.post("/api/posts/comment", authentication, postControllers.commentPost);
 
 // Like/Unlike Post
-router.post("/api/posts/interact", authentication, postControllers.interactPost);
+router.post(
+  "/api/posts/interact",
+  authentication,
+  postControllers.interactPost
+);
 
 // Share Post
 router.post("/api/posts/share", authentication, postControllers.sharePost);
@@ -24,22 +33,34 @@ router.post("/api/posts/reply", authentication, postControllers.replyComment);
 router.post("/api/posts/archive", authentication, postControllers.archivePost);
 
 // Delete Post
-router.delete("/api/posts/del/:postId", authentication, postControllers.deletePost);
+router.delete("/api/posts/:postId", authentication, postControllers.deletePost);
 
 // Update Post
 router.patch("/api/posts/:postId", authentication, postControllers.updatePost);
 
 // Update Comment
-router.patch("/api/posts/comment/:commentId", authentication, postControllers.updateComment);
+router.patch(
+  "/api/posts/comment/:commentId",
+  authentication,
+  postControllers.updateComment
+);
 
 // Update Reply
-router.patch("/api/posts/reply/:commentId/:replyId", authentication, postControllers.updateReply);
+router.patch(
+  "/api/posts/reply/:commentId/:replyId",
+  authentication,
+  postControllers.updateReply
+);
 
 //  User's List Posts
 router.get("/api/posts/me", authentication, postControllers.getUserListPosts);
 
 // User's List Archived Posts
-router.get("/api/posts/archives", authentication, postControllers.getUserListArchivedPosts);
+router.get(
+  "/api/posts/archives",
+  authentication,
+  postControllers.getUserListArchivedPosts
+);
 
 /**
  * @swagger
@@ -188,7 +209,7 @@ router.get("/api/posts/archives", authentication, postControllers.getUserListArc
  *         description: "Thông tin bài đăng không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/posts/del/{postId}:
+ * /api/posts/{postId}:
  *   delete:
  *     summary: "Xóa bài đăng"
  *     description: "API cho phép người dùng xóa một bài đăng."
@@ -210,7 +231,6 @@ router.get("/api/posts/archives", authentication, postControllers.getUserListArc
  *         description: "Thông tin bài đăng không hợp lệ"
  *       500:
  *         description: "Lỗi máy chủ"
- * /api/posts/{postId}:
  *   patch:
  *     summary: "Cập nhật bài đăng"
  *     description: "API cho phép người dùng cập nhật một bài đăng cụ thể."

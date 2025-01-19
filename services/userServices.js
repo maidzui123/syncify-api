@@ -32,7 +32,7 @@ const getListFriendsAll = async (userId) => {
 
     return listFriends;
   } catch {
-    return false;
+    return [];
   }
 };
 

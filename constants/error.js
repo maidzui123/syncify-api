@@ -39,4 +39,5 @@ export const ERROR = {
   REPLY_NOT_FOUND: "REPLY_NOT_FOUND", // Reply not found
   REPLY_UPDATE_UNAUTHORIZED: "REPLY_UPDATE_UNAUTHORIZED", // You are not authorized to update this reply
   NOTI_NOT_FOUND: "NOTI_NOT_FOUND", // Notification not found
+  CHAT_NOT_FOUND: "CHAT_NOT_FOUND", // Chat not found
 };

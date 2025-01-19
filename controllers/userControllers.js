@@ -40,7 +40,7 @@ userControllers.getListFriends = async (req, res) => {
   try {
     const userId = req.user;
     const cursor = req.query.cursor;
-    const limit = req.query.limit;
+    const limit = req.query.limit || 10;
     return await userServices.handleGetListFriends(userId, cursor, limit, res);
   } catch (error) {
     return sendResponse({
@@ -59,7 +59,7 @@ userControllers.getListFriendsRequest = async (req, res) => {
     const type = req.query.type;
     const scope = req.query.scope;
     const cursor = req.query.cursor;
-    const limit = req.query.limit;
+    const limit = req.query.limit || 10;
     return await userServices.handleGetListFriendsRequest(
       userId,
       type,

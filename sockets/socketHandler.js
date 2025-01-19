@@ -42,6 +42,14 @@ const socketHandler = (io) => {
       });
     });
 
+    // Lắng nghe sự kiện tham gia phòng
+    socket.on("joinRoom", ({ chatId }) => {
+      socket.join(chatId);
+      console.log(`User ${socket.userId} joined room ${chatId}`);
+      console.log("Rooms this socket has joined:", socket.rooms);
+
+    });
+
     // User Offline
     socket.on("disconnect", async () => {
       await userServices.handleUpdateStatus(socket.userId, false);
@@ -68,7 +76,8 @@ const socketHandler = (io) => {
     "acceptFriendRequest",
     "like",
     "comment",
-    "replyComment"
+    "replyComment",
+    "chatMessage"
   );
 
   subClient.on("message", (channel, message) => {
@@ -84,6 +93,10 @@ const socketHandler = (io) => {
         userId: eventData.userId,
         disconnectedAt: eventData.disconnectedAt,
       });
+    } else if (channel === "chatMessage") {
+      console.log("🚀 ~ subClient.on ~ eventData.chatId:", eventData.chatId)
+      console.log("🚀 ~ subClient.on ~ eventData.socketId:", eventData.socketId)
+      io.sockets.sockets.get(eventData.socketId)?.to(eventData.chatId).emit(channel, eventData.msgData);
     } else {
       io.to(eventData.userId).emit(channel, eventData);
     }
@@ -99,4 +112,12 @@ const sendNotification = async (userId, otherUserId, type) => {
 
   pubClient.publish(type, JSON.stringify(payload));
 };
-export { socketHandler, sendNotification };
+
+const sendMessageChat = async (chatId, socketId, msgData) => {
+  if (!msgData) {
+    return;
+  }
+  pubClient.publish("chatMessage", JSON.stringify({ chatId, socketId, msgData }));
+};
+
+export { socketHandler, sendNotification, sendMessageChat };
